@@ -3,7 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="895a9e1c-83e3-435f-9c69-b79822bfcae5" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/docs/css/app.css" afterPath="$PROJECT_DIR$/docs/css/app.css" />
     </list>
     <ignored path="Planet-Harvesting.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -322,7 +321,7 @@
       <workItem from="1476988416302" duration="6967000" />
       <workItem from="1476996930188" duration="35000" />
       <workItem from="1476997566907" duration="4635000" />
-      <workItem from="1477343820922" duration="4130000" />
+      <workItem from="1477343820922" duration="4151000" />
     </task>
     <task id="LOCAL-00001" summary="add local dependancies: leaflet, jquery, toastr, bootstrap">
       <created>1477030048574</created>
@@ -338,11 +337,18 @@
       <option name="project" value="LOCAL" />
       <updated>1477349168228</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="add 4 ressources type">
+      <created>1477376562760</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1477376562760</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="15767000" />
+    <option name="totallyTimeSpent" value="15788000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="6" />
