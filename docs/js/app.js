@@ -6,42 +6,17 @@ var circle;
 var lastLocation = [];
 var ressourcesPoints = [];
 var ressourceStock = {};
-var RULES = {
-    "ressourcesPointDuration": 60 * 1000, // in ms
-    "ressourcesPointNumber": 50,
-    "distanceCatchResource": 100 // in m
-};
 
-var RESSOUCES = {
-    "gold": {
-        "icon": "img/ressources/gold.png",
-        "spawnRate": 0.05
-    },
-    "silver": {
-        "icon": "img/ressources/silver.png",
-        "spawnRate": 0.05
-    },
-    "copper": {
-        "icon": "img/ressources/copper.png",
-        "spawnRate": 0.1
-    },
-    "iron": {
-        "icon": "img/ressources/iron.png",
-        "spawnRate": 0.3
-    },
-    "wood": {
-        "icon": "img/ressources/wood.png",
-        "spawnRate": 0.5
-    },
-    "marble": {
-        "icon": "img/ressources/marble.png",
-        "spawnRate": 0.5
-    },
-    "obsidian": {
-        "icon": "img/ressources/obsidian.png",
-        "spawnRate": 0.5
+if (window.localStorage.getItem('ressourceStock')) {
+    try {
+        ressourceStock = JSON.parse(window.localStorage.getItem('ressourceStock'));
+    } catch (err) {
+        console.warn("could not load ressourceStock from localStorage ", err);
+        ressourceStock = {};
+        window.localStorage.setItem('ressourceStock', JSON.stringify(ressourceStock));
     }
-};
+}
+
 var MyControl = L.Control.extend({
     options: {
         position: 'topright'
@@ -130,7 +105,7 @@ function updateRessourcesPoints() {
     for (var pointIndex = 0; pointIndex < ressourcesPoints.length; pointIndex++) {
         var point = ressourcesPoints[pointIndex];
         if ((new Date() - point.creation) > RULES.ressourcesPointDuration) {
-            console.log("rm rp", point);
+            //console.log("rm rp", point);
             rmRessourcesPointsOnMap(point);
             ressourcesPoints.splice(pointIndex, 1);
         }
@@ -140,7 +115,7 @@ function updateRessourcesPoints() {
         for (var i = ressourcesPoints.length; i < RULES.ressourcesPointNumber; i++) {
             point = createRessourcesPoints();
             if (point) {
-                console.log("add rp", point);
+                //console.log("add rp", point);
                 ressourcesPoints.push(point);
             }
         }
@@ -224,6 +199,7 @@ function resourceCaught(point, pointIndex) {
     updateRessourceStock();
     rmRessourcesPointsOnMap(point);
     ressourcesPoints.splice(pointIndex, 1);
+    window.localStorage.setItem('ressourceStock', JSON.stringify(ressourceStock));
 }
 
 function updateRessourceStock() {
