@@ -5,6 +5,11 @@ var RULES = {
 };
 
 var RESSOUCES = {
+    //
+    "diamond": {
+        "icon": "img/ressources/diamond.png",
+        "spawnRate": 0.01
+    },
     "gold": {
         "icon": "img/ressources/gold.png",
         "spawnRate": 0.05

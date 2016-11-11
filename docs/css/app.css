@@ -10,6 +10,13 @@
     padding: 10px;
     padding-right: 20px;
 }
+#mainBuilding {
+    vertical-align: middle;
+}
+#mainBuilding img {
+    width: 32px;
+    height: 32px;
+}
 body {
     padding: 0; margin: 0;
 }
