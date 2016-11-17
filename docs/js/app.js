@@ -32,7 +32,8 @@ $(document).ready(function() {
             // create the control container with a particular class name
             var container = L.DomUtil.create('div', 'my-custom-control leaflet-bar leaflet-control');
             $(container).html('<div class="leaflet-bar">' +
-                '<a id="asideBtn" class="leaflet-control-zoom-in" href="#" title="Zoom in">=</a>' +
+                '<a id="locationBtn" class="localtionActive leaflet-control-zoom-in fa fa-dot-circle-o" href="#" title="Center to current location"></a>' +
+                '<a id="asideBtn" class="leaflet-control-zoom-in fa fa-bars" href="#" title="Open menu"></a>' +
                 '<div id="aside" class="hidden">Ressources<div id="ressourcesStock">' +
                 '<ul id="ressourcesList">' +
                 '</ul>' +
@@ -62,21 +63,32 @@ $(document).ready(function() {
     $('#asideBtn').on('click', function () {
         $('#aside').toggle();
     });
+    $('#locationBtn').on('click', function () {
+        moveMapToLocation = !moveMapToLocation;
+        if (moveMapToLocation) {
+            $(this).removeClass('localtionInActive');
+            $(this).addClass('localtionActive');
+        } else {
+            $(this).removeClass('localtionActive');
+            $(this).addClass('localtionInActive');
+        }
+    });
+
     $('#mainBuilding').on('click', function () {
         var mainBuld = findPoiByName('mainBuilding');
         if (mainBuld === null) {
             pointsOfInterest.push({
                 'type' : 'building',
                 'name' : 'mainBuilding',
-                'latLng' : L.latLng(lastLocation[0].latlng)
+                'latLng' : L.latLng(map.getCenter())
             });
+            window.localStorage.setItem('pointsOfInterest', JSON.stringify(pointsOfInterest));
             console.log(lastLocation[0]);
         } else {
             console.log(mainBuld);
             map.panTo(L.latLng(mainBuld.latLng));
         }
         putPoisOnMap();
-        moveMapToLocation = !moveMapToLocation;
     });
 
 
@@ -287,4 +299,5 @@ $(document).ready(function() {
     });
 
     setInterval(updateRessourcesPoints, 3000);
+    updateRessourceStock();
 });

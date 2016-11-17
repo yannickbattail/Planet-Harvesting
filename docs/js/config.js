@@ -36,6 +36,10 @@ var RESSOUCES = {
     },
     "obsidian": {
         "icon": "img/ressources/obsidian.png",
+        "spawnRate": 0.2
+    },
+    "coal": {
+        "icon": "img/ressources/coal.png",
         "spawnRate": 0.5
     }
 };

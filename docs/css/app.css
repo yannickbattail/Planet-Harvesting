@@ -3,6 +3,7 @@
     width: 600px;
     height: 400px;
 }
+
 #aside {
     display: none;
     background-color: white;
@@ -10,16 +11,29 @@
     padding: 10px;
     padding-right: 20px;
 }
+
 #mainBuilding {
     vertical-align: middle;
 }
+
 #mainBuilding img {
     width: 32px;
     height: 32px;
 }
-body {
-    padding: 0; margin: 0;
+
+.localtionActive {
+    color: blue !important;
 }
+
+.localtionInActive {
+    color: dimgrey !important;
+}
+
+body {
+    padding: 0;
+    margin: 0;
+}
+
 html, body, #map {
     height: 100vh;
     width: 100vw;

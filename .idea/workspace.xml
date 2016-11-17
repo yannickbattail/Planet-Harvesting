@@ -323,7 +323,7 @@
       <workItem from="1476997566907" duration="4635000" />
       <workItem from="1477343820922" duration="6585000" />
       <workItem from="1477601319404" duration="9338000" />
-      <workItem from="1478810728516" duration="641000" />
+      <workItem from="1478810728516" duration="1238000" />
     </task>
     <task id="LOCAL-00001" summary="add local dependancies: leaflet, jquery, toastr, bootstrap">
       <created>1477030048574</created>
@@ -357,7 +357,7 @@
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="28201000" />
+    <option name="totallyTimeSpent" value="28798000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-8" width="1936" height="1056" extended-state="7" />
