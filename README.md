@@ -1,5 +1,5 @@
 # Planet-Harvesting
-Gps base game
 
-Test it at
-https://rawgit.com/yannickbattail/Planet-Harvesting/master/docs/Planet-Harvesting.html
+Gps base game. Collect resources on the map.
+
+Test it here: [Planet-Harvesting](https://yannickbattail.github.io/Planet-Harvesting/Planet-Harvesting.html)
