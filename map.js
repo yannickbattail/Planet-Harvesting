@@ -1,13 +1,13 @@
 generate();
 
 function generate() {
-	d3.select(".mapCells").remove();
+  d3.select(".mapCells").remove();
   var svg = d3.select("svg");
   var mapCells = svg.append("g").attr("class", "mapCells")
-        .on("touchmove mousemove", moved)
-        .on("click", clicked);
-  var width = +svg.attr("width");
-  var height = +svg.attr("height");
+        .on("touchmove mousemove", drawMouseCircle)
+        .on("click", createHill);
+  var width = parseInt(svg.attr("width"));
+  var height = parseInt(svg.attr("height"));
   var sites = d3.range(sizeInput.valueAsNumber).map(
       d => [Math.random() * width, Math.random() * height]
     );
@@ -16,7 +16,12 @@ function generate() {
   var diagram = voronoi(sites);
   var polygons = diagram.polygons();
   var color = d3.scaleSequential(d3.interpolateSpectral);
-  var queue = [];
+
+  // change options to defaults for hills
+  highInput.value = 0.5;
+  highOutput.value = 0.5;
+  radiusInput.value = 0.99;
+  radiusOutput.value = 0.99;
 
   detectNeighbors(polygons, diagram);
   polygonAppendPath(polygons);
@@ -43,21 +48,16 @@ function generate() {
     );
   }
 
-  function add(start, type) {    
-    // get options
-    var high = highInput.valueAsNumber,
-        radius = radiusInput.valueAsNumber,
-        sharpness = sharpnessInput.valueAsNumber,
-        queue = []; // new queue
+  function add(start) {
+    var high = highInput.valueAsNumber;
+    var radius = radiusInput.valueAsNumber;
+    var sharpness = sharpnessInput.valueAsNumber;
+    var queue = [];
     polygons[start].high += high;
     polygons[start].used = 1;
     queue.push(start);
     for (let i = 0; i < queue.length && high > 0.01; i++) {
-      if (type == "island") {
-      	 high = polygons[queue[i]].high * radius;
-      } else {
-      	high = high * radius;
-      }
+      high = high * radius;
       polygons[queue[i]].neighbors.forEach(e => {
         if (!polygons[e].used) {
           var mod = Math.random() * sharpness + 1.1-sharpness;
@@ -69,44 +69,38 @@ function generate() {
         }
       });
     }
-    // re-color the polygons based on new highs
-    polygons.map(i => {
-      $("#" + i.index).attr("fill", color(1-i.high));
-      i.used = undefined; // remove used attribute
+    polygons.map(polyg => {
+      polyg.used = false;
     });
   }
 
-	function clicked(e) {
-    // draw circle based on options on mousemove
-    var point = d3.mouse(this),
-        nearest = diagram.find(point[0], point[1]).index;
-		mapCells.append("circle")
+  /**
+   * re-color the polygons based on new highs
+   * @param {*} polygonList 
+   */
+  function recolorPolygones(polygonList) {
+    polygonList.forEach(
+        polyg => $("#" + polyg.index).attr("fill", color(1-polyg.high))
+      );
+  }
+
+  function createHill(e) {
+    var point = d3.mouse(this);
+    var nearest = diagram.find(point[0], point[1]).index;
+    mapCells.append("circle")
       .attr("r", 3)
       .attr("cx", point[0])
       .attr("cy", point[1])
       .attr("fill", color(1 - highInput.valueAsNumber))
       .attr("class", "circle");
-    if ($(".circle").length == 1) {
-			add(nearest, "island");
-			// change options to defaults for hills
-			highInput.value = 0.2;
-      highOutput.value = 0.2;
-      radiusInput.value = 0.99;
-      radiusOutput.value = 0.99;
-    } else {
-    	add(nearest, "hill");
-      // let's make high random for hills
-      var height = Math.random() * 0.4 + 0.1;
-      highInput.value = height;
-      highInput.value = height;
-    }   
+    add(nearest);
+    recolorPolygones(polygons);
   }
 
-	function moved() {
-    // draw circle based on options on mousemove
-    var point = d3.mouse(this),
-        nearest = diagram.find(point[0], point[1]).index,
-        radius = (radiusInput.valueAsNumber)*50;
+  function drawMouseCircle() {
+    var point = d3.mouse(this);
+    var nearest = diagram.find(point[0], point[1]).index;
+    var radius = radiusInput.valueAsNumber * 50;
     $("#cell").text(nearest);
     $("#high").text((polygons[nearest].high).toFixed(2));
     svg.select(".radius").remove();
