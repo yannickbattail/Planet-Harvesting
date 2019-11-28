@@ -1,4 +1,62 @@
-generate();
+"use strict";
+
+function detectNeighbors(polygonList, diagramme) {
+  // push neighbors indexes to each polygons element
+  polygonList.forEach((polyg, polygIndex) => {
+    polyg.index = polygIndex;
+    polyg.high = 0;
+    polyg.neighbors = diagramme.cells[polygIndex].halfedges
+      .map(e => diagramme.edges[e])
+      .filter(e => e.left && e.right)
+      .map(e => e.left.index === polygIndex?e.right.index:e.left.index);
+  });
+}
+
+function polygonAppendPath(polygonList, cells, color) {
+  polygonList.forEach(
+    polyg => cells.append("path")
+              .attr("d", "M" + polyg.join("L") + "Z")
+              .attr("id", polyg.index)
+              .attr("class", "mapCell")
+              .attr("fill", color(1-polyg.high))
+  );
+}
+
+function recolorPolygonesFromHighs(polygonList, color) {
+  polygonList.forEach(
+      polyg => $("#" + polyg.index).attr("fill", color(1-polyg.high))
+    );
+}
+
+function addhill(polygonList, start, high, radius, sharpness) {
+  var queue = [];
+  polygonList[start].high += high;
+  polygonList[start].used = 1;
+  queue.push(start);
+  for (let i = 0; i < queue.length && high > 0.01; i++) {
+    high = high * radius;
+    polygonList[queue[i]].neighbors
+      .filter(e => !polygonList[e].used)
+      .forEach(e => {
+        polygonList[e].high = computeNewHeight(polygonList[e].high, high, sharpness);
+        polygonList[e].used = true;
+        queue.push(e);
+      });
+  }
+  polygonList.forEach(polyg => polyg.used = false);
+}
+
+function computeNewHeight(previousHeight, height, sharpness) {
+  var mod = Math.random() * sharpness + 1.1-sharpness;
+  if (sharpness == 0) {
+    mod = 1;
+  }
+  var newHeight = previousHeight + height * mod;
+  if (newHeight > 1) {
+    return 1;
+  }
+  return newHeight;
+}
 
 function generate() {
   d3.select(".mapCells").remove();
@@ -24,60 +82,8 @@ function generate() {
   radiusOutput.value = 0.99;
 
   detectNeighbors(polygons, diagram);
-  polygonAppendPath(polygons, mapCells);
+  polygonAppendPath(polygons, mapCells, color);
 
-  function detectNeighbors(polygonList, diagramme) {
-    // push neighbors indexes to each polygons element
-    polygonList.forEach((polyg, polygIndex) => {
-      polyg.index = polygIndex;
-      polyg.high = 0;
-      polyg.neighbors = diagramme.cells[polygIndex].halfedges
-        .map(e => diagramme.edges[e])
-        .filter(e => e.left && e.right)
-        .map(e => e.left.index === polygIndex?e.right.index:e.left.index);
-    });
-  }
-
-  function polygonAppendPath(polygonList, cells) {
-    polygonList.forEach(
-      polyg => cells.append("path")
-                .attr("d", "M" + polyg.join("L") + "Z")
-                .attr("id", polyg.index)
-                .attr("class", "mapCell")
-                .attr("fill", color(1-polyg.high))
-    );
-  }
-
-  function add(polygonList, start, high, radius, sharpness) {
-    var queue = [];
-    polygonList[start].high += high;
-    polygonList[start].used = 1;
-    queue.push(start);
-    for (let i = 0; i < queue.length && high > 0.01; i++) {
-      high = high * radius;
-      polygonList[queue[i]].neighbors
-        .filter(e => !polygonList[e].used)
-        .forEach(e => {
-          var mod = Math.random() * sharpness + 1.1-sharpness;
-          if (sharpness == 0) {
-            mod = 1;
-          }
-          polygonList[e].high += high * mod;
-          if (polygonList[e].high > 1) {
-            polygonList[e].high = 1;
-          }
-          polygonList[e].used = true;
-          queue.push(e);
-        });
-    }
-    polygonList.forEach(polyg => polyg.used = false);
-  }
-
-  function recolorPolygonesFromHighs(polygonList) {
-    polygonList.forEach(
-        polyg => $("#" + polyg.index).attr("fill", color(1-polyg.high))
-      );
-  }
 
   function createHill(e) {
     var point = d3.mouse(this);
@@ -88,8 +94,8 @@ function generate() {
       .attr("cy", point[1])
       .attr("fill", color(1 - highInput.valueAsNumber))
       .attr("class", "circle");
-    add(polygons, nearest, highInput.valueAsNumber, radiusInput.valueAsNumber, sharpnessInput.valueAsNumber);
-    recolorPolygonesFromHighs(polygons);
+    addhill(polygons, nearest, highInput.valueAsNumber, radiusInput.valueAsNumber, sharpnessInput.valueAsNumber);
+    recolorPolygonesFromHighs(polygons, color);
   }
 
   function drawMouseCircle() {
@@ -106,3 +112,5 @@ function generate() {
       .attr("class", "radius");
   }
 }
+
+generate();
