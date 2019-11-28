@@ -1,4 +1,11 @@
 "use strict";
+/*globals $:false */
+/*globals d3:false */
+
+function getColorFormHeight(high) {
+  var color = d3.scaleSequential(d3.interpolateSpectral);
+  return color(1-high);
+}
 
 function detectNeighbors(polygonList, diagramme) {
   // push neighbors indexes to each polygons element
@@ -12,19 +19,19 @@ function detectNeighbors(polygonList, diagramme) {
   });
 }
 
-function polygonAppendPath(polygonList, cells, color) {
+function polygonAppendPath(polygonList, cells) {
   polygonList.forEach(
     polyg => cells.append("path")
               .attr("d", "M" + polyg.join("L") + "Z")
               .attr("id", polyg.index)
               .attr("class", "mapCell")
-              .attr("fill", color(1-polyg.high))
+              .attr("fill", getColorFormHeight(polyg.high))
   );
 }
 
-function recolorPolygonesFromHighs(polygonList, color) {
+function recolorPolygonesFromHighs(polygonList) {
   polygonList.forEach(
-      polyg => $("#" + polyg.index).attr("fill", color(1-polyg.high))
+      polyg => $("#" + polyg.index).attr("fill", getColorFormHeight(polyg.high))
     );
 }
 
@@ -59,19 +66,19 @@ function computeNewHeight(previousHeight, height, sharpness) {
   return newHeight;
 }
 
-function createHill(config, point, diagram, mapCells, polygons, color) {
+function createHill(config, point, diagram, polygons, mapCells) {
   var nearest = diagram.find(point[0], point[1]).index;
   mapCells.append("circle")
     .attr("r", 3)
     .attr("cx", point[0])
     .attr("cy", point[1])
-    .attr("fill", color(1 - config.high))
+    .attr("fill", getColorFormHeight(config.high))
     .attr("class", "circle");
   addhill(polygons, nearest, config);
-  recolorPolygonesFromHighs(polygons, color);
+  recolorPolygonesFromHighs(polygons);
 }
 
-function drawMouseCircle(config, point, diagram, svg, polygons) {
+function drawMouseCircle(config, point, diagram, polygons, svg) {
   var nearest = diagram.find(point[0], point[1]).index;
   var radius = config.radius * 50;
   $("#cell").text(nearest);
@@ -110,22 +117,17 @@ function generate() {
   sites = voronoi(sites).polygons().map(d3.polygonCentroid);
   var diagram = voronoi(sites);
   var polygons = diagram.polygons();
-  var color = d3.scaleSequential(d3.interpolateSpectral);
 
   function eventCreateHill() {
-    var config = getConfig();
-    var point = d3.mouse(this);
-    createHill(config, point, diagram, mapCells, polygons, color);
+    createHill(getConfig(), d3.mouse(this), diagram, polygons, mapCells);
   }
   
   function eventDdrawMouseCircle() {
-    var config = getConfig();
-    var point = d3.mouse(this);
-    drawMouseCircle(config, point, diagram, svg, polygons);
+    drawMouseCircle(getConfig(), d3.mouse(this), diagram, polygons, svg);
   }
   
   detectNeighbors(polygons, diagram);
-  polygonAppendPath(polygons, mapCells, color);
+  polygonAppendPath(polygons, mapCells);
 }
 
 generate();
