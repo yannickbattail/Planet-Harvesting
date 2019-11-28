@@ -1,48 +1,47 @@
-
 generate();
 
 function generate() {
 	d3.select(".mapCells").remove();
-  var svg = d3.select("svg"),
-      mapCells = svg.append("g").attr("class", "mapCells")
+  var svg = d3.select("svg");
+  var mapCells = svg.append("g").attr("class", "mapCells")
         .on("touchmove mousemove", moved)
-        .on("click", clicked),
-      width = +svg.attr("width"),
-      height = +svg.attr("height"),
-      sites = d3.range(sizeInput.valueAsNumber).map(function(d) {
-        return [Math.random() * width,
-          Math.random() * height];}),
-      voronoi = d3.voronoi().extent([[0, 0],[width, height]]),
-      sites = voronoi(sites).polygons().map(d3.polygonCentroid),
-      diagram = voronoi(sites),
-      polygons = diagram.polygons(),
-      color = d3.scaleSequential(d3.interpolateSpectral),
-      queue = [];
+        .on("click", clicked);
+  var width = +svg.attr("width");
+  var height = +svg.attr("height");
+  var sites = d3.range(sizeInput.valueAsNumber).map(
+      d => [Math.random() * width, Math.random() * height]
+    );
+  var voronoi = d3.voronoi().extent([[0, 0],[width, height]]);
+  sites = voronoi(sites).polygons().map(d3.polygonCentroid);
+  var diagram = voronoi(sites);
+  var polygons = diagram.polygons();
+  var color = d3.scaleSequential(d3.interpolateSpectral);
+  var queue = [];
 
   detectNeighbors();
 
   function detectNeighbors() {
     // push neighbors indexes to each polygons element
-    polygons.map(function(i, d) {
-      i.index = d; // index of this element
-      i.high = 0;
+    polygons.map((polyg, polygIndex) => {
+      polyg.index = polygIndex; // index of this element
+      polyg.high = 0;
       var neighbors = [];
-      diagram.cells[d].halfedges.forEach(function(e) {
-        var edge = diagram.edges[e], ea;
+      diagram.cells[polygIndex].halfedges.forEach(e => {
+        var edge = diagram.edges[e];
         if (edge.left && edge.right) {
-          ea = edge.left.index;
-          if (ea === d) {
+          let ea = edge.left.index;
+          if (ea === polygIndex) {
             ea = edge.right.index;
           }
           neighbors.push(ea);
         }
-      })
-      i.neighbors = neighbors;
+      });
+      polyg.neighbors = neighbors;
       mapCells.append("path")
-        .attr("d", "M" + i.join("L") + "Z")
-        .attr("id", d)
+        .attr("d", "M" + polyg.join("L") + "Z")
+        .attr("id", polygIndex)
         .attr("class", "mapCell")
-        .attr("fill", color(1-i.high));
+        .attr("fill", color(1-polyg.high));
     });
   }
 
@@ -55,13 +54,13 @@ function generate() {
     polygons[start].high += high;
     polygons[start].used = 1;
     queue.push(start);
-    for (i = 0; i < queue.length && high > 0.01; i++) {
+    for (let i = 0; i < queue.length && high > 0.01; i++) {
       if (type == "island") {
       	 high = polygons[queue[i]].high * radius;
       } else {
       	high = high * radius;
       }
-      polygons[queue[i]].neighbors.forEach(function(e) {
+      polygons[queue[i]].neighbors.forEach(e => {
         if (!polygons[e].used) {
           var mod = Math.random() * sharpness + 1.1-sharpness;
           if (sharpness == 0) {mod = 1;}
@@ -73,7 +72,7 @@ function generate() {
       });
     }
     // re-color the polygons based on new highs
-    polygons.map(function(i) {
+    polygons.map(i => {
       $("#" + i.index).attr("fill", color(1-i.high));
       i.used = undefined; // remove used attribute
     });
