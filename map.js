@@ -48,37 +48,37 @@ function generate() {
     );
   }
 
-  function add(start) {
+  function add(polygonList, start) {
     var high = highInput.valueAsNumber;
     var radius = radiusInput.valueAsNumber;
     var sharpness = sharpnessInput.valueAsNumber;
     var queue = [];
-    polygons[start].high += high;
-    polygons[start].used = 1;
+    polygonList[start].high += high;
+    polygonList[start].used = 1;
     queue.push(start);
     for (let i = 0; i < queue.length && high > 0.01; i++) {
       high = high * radius;
-      polygons[queue[i]].neighbors.forEach(e => {
-        if (!polygons[e].used) {
-          var mod = Math.random() * sharpness + 1.1-sharpness;
-          if (sharpness == 0) {mod = 1;}
-          polygons[e].high += high * mod;
-          if (polygons[e].high > 1) {polygons[e].high = 1;}
-          polygons[e].used = 1;
-          queue.push(e);
+      polygonList[queue[i]].neighbors
+      .filter(e => !polygonList[e].used)
+      .forEach(e => {
+        var mod = Math.random() * sharpness + 1.1-sharpness;
+        if (sharpness == 0) {
+          mod = 1;
         }
+        polygonList[e].high += high * mod;
+        if (polygonList[e].high > 1) {
+          polygonList[e].high = 1;
+        }
+        polygonList[e].used = true;
+        queue.push(e);
       });
     }
-    polygons.map(polyg => {
+    polygonList.map(polyg => {
       polyg.used = false;
     });
   }
 
-  /**
-   * re-color the polygons based on new highs
-   * @param {*} polygonList 
-   */
-  function recolorPolygones(polygonList) {
+  function recolorPolygonesFromHighs(polygonList) {
     polygonList.forEach(
         polyg => $("#" + polyg.index).attr("fill", color(1-polyg.high))
       );
@@ -93,8 +93,8 @@ function generate() {
       .attr("cy", point[1])
       .attr("fill", color(1 - highInput.valueAsNumber))
       .attr("class", "circle");
-    add(nearest);
-    recolorPolygones(polygons);
+    add(polygons, nearest);
+    recolorPolygonesFromHighs(polygons);
   }
 
   function drawMouseCircle() {
