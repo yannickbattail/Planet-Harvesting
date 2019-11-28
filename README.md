@@ -1,5 +1,5 @@
-# Planet-Harvesting
+# map genegration
 
-Gps base game. Collect resources on the map.
+Source from https://azgaar.wordpress.com/2017/04/01/heightmap/
 
-Test it here: [Planet-Harvesting](https://yannickbattail.github.io/Planet-Harvesting/Planet-Harvesting.html)
+Code from https://jsfiddle.net/gt8coshz/
