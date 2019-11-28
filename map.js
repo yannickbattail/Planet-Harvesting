@@ -9,7 +9,7 @@ function generate() {
   var width = parseInt(svg.attr("width"));
   var height = parseInt(svg.attr("height"));
   var sites = d3.range(sizeInput.valueAsNumber).map(
-      d => [Math.random() * width, Math.random() * height]
+      () => [Math.random() * width, Math.random() * height]
     );
   var voronoi = d3.voronoi().extent([[0, 0],[width, height]]);
   sites = voronoi(sites).polygons().map(d3.polygonCentroid);
@@ -24,7 +24,7 @@ function generate() {
   radiusOutput.value = 0.99;
 
   detectNeighbors(polygons, diagram);
-  polygonAppendPath(polygons);
+  polygonAppendPath(polygons, mapCells);
 
   function detectNeighbors(polygonList, diagramme) {
     // push neighbors indexes to each polygons element
@@ -38,9 +38,9 @@ function generate() {
     });
   }
 
-  function polygonAppendPath(polygonList) {
+  function polygonAppendPath(polygonList, cells) {
     polygonList.forEach(
-      polyg => mapCells.append("path")
+      polyg => cells.append("path")
                 .attr("d", "M" + polyg.join("L") + "Z")
                 .attr("id", polyg.index)
                 .attr("class", "mapCell")
@@ -48,10 +48,7 @@ function generate() {
     );
   }
 
-  function add(polygonList, start) {
-    var high = highInput.valueAsNumber;
-    var radius = radiusInput.valueAsNumber;
-    var sharpness = sharpnessInput.valueAsNumber;
+  function add(polygonList, start, high, radius, sharpness) {
     var queue = [];
     polygonList[start].high += high;
     polygonList[start].used = 1;
@@ -59,23 +56,21 @@ function generate() {
     for (let i = 0; i < queue.length && high > 0.01; i++) {
       high = high * radius;
       polygonList[queue[i]].neighbors
-      .filter(e => !polygonList[e].used)
-      .forEach(e => {
-        var mod = Math.random() * sharpness + 1.1-sharpness;
-        if (sharpness == 0) {
-          mod = 1;
-        }
-        polygonList[e].high += high * mod;
-        if (polygonList[e].high > 1) {
-          polygonList[e].high = 1;
-        }
-        polygonList[e].used = true;
-        queue.push(e);
-      });
+        .filter(e => !polygonList[e].used)
+        .forEach(e => {
+          var mod = Math.random() * sharpness + 1.1-sharpness;
+          if (sharpness == 0) {
+            mod = 1;
+          }
+          polygonList[e].high += high * mod;
+          if (polygonList[e].high > 1) {
+            polygonList[e].high = 1;
+          }
+          polygonList[e].used = true;
+          queue.push(e);
+        });
     }
-    polygonList.map(polyg => {
-      polyg.used = false;
-    });
+    polygonList.forEach(polyg => polyg.used = false);
   }
 
   function recolorPolygonesFromHighs(polygonList) {
@@ -93,7 +88,7 @@ function generate() {
       .attr("cy", point[1])
       .attr("fill", color(1 - highInput.valueAsNumber))
       .attr("class", "circle");
-    add(polygons, nearest);
+    add(polygons, nearest, highInput.valueAsNumber, radiusInput.valueAsNumber, sharpnessInput.valueAsNumber);
     recolorPolygonesFromHighs(polygons);
   }
 
