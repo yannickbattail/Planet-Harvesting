@@ -18,31 +18,29 @@ function generate() {
   var color = d3.scaleSequential(d3.interpolateSpectral);
   var queue = [];
 
-  detectNeighbors();
+  detectNeighbors(polygons, diagram);
+  polygonAppendPath(polygons);
 
-  function detectNeighbors() {
+  function detectNeighbors(polygonList, diagramme) {
     // push neighbors indexes to each polygons element
-    polygons.map((polyg, polygIndex) => {
-      polyg.index = polygIndex; // index of this element
+    polygonList.forEach((polyg, polygIndex) => {
+      polyg.index = polygIndex;
       polyg.high = 0;
-      var neighbors = [];
-      diagram.cells[polygIndex].halfedges.forEach(e => {
-        var edge = diagram.edges[e];
-        if (edge.left && edge.right) {
-          let ea = edge.left.index;
-          if (ea === polygIndex) {
-            ea = edge.right.index;
-          }
-          neighbors.push(ea);
-        }
-      });
-      polyg.neighbors = neighbors;
-      mapCells.append("path")
-        .attr("d", "M" + polyg.join("L") + "Z")
-        .attr("id", polygIndex)
-        .attr("class", "mapCell")
-        .attr("fill", color(1-polyg.high));
+      polyg.neighbors = diagramme.cells[polygIndex].halfedges
+        .map(e => diagramme.edges[e])
+        .filter(e => e.left && e.right)
+        .map(e => e.left.index === polygIndex?e.right.index:e.left.index);
     });
+  }
+
+  function polygonAppendPath(polygonList) {
+    polygonList.forEach(
+      polyg => mapCells.append("path")
+                .attr("d", "M" + polyg.join("L") + "Z")
+                .attr("id", polyg.index)
+                .attr("class", "mapCell")
+                .attr("fill", color(1-polyg.high))
+    );
   }
 
   function add(start, type) {    
