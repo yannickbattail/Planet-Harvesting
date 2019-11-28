@@ -93,10 +93,10 @@ function drawMouseCircle(config, point, diagram, polygons, svg) {
 
 function getConfig() {
   return {
-    size: parseInt(sizeInput.valueAsNumber),
-    high: parseFloat(highInput.valueAsNumber),
-    radius: parseFloat(radiusInput.valueAsNumber),
-    sharpness: parseFloat(sharpnessInput.valueAsNumber)
+    size: parseInt($("#sizeInput").val()),
+    high: parseFloat($("#highInput").val()),
+    radius: parseFloat($("#radiusInput").val()),
+    sharpness: parseFloat($("#sharpnessInput").val())
   };
 }
 
