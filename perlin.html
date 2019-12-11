@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Perlin</title>
+  <style>
+    body {
+      background-color: bisque;
+    }
+    td {
+      text-align: center;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+
+  <table id="table" border="1">
+    <tr>
+      <td>
+        <canvas id="octave0" width="1" height="1"></canvas>
+      </td>
+      <td>
+        <canvas id="Roctave0" width="256" height="256"></canvas>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <canvas id="octave1" width="2" height="2"></canvas>
+      </td>
+      <td>
+        <canvas id="Roctave1" width="256" height="256"></canvas>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <canvas id="octave2" width="4" height="4"></canvas>
+      </td>
+      <td>
+        <canvas id="Roctave2" width="256" height="256"></canvas>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <canvas id="octave3" width="8" height="8"></canvas>
+      </td>
+      <td>
+        <canvas id="Roctave3" width="256" height="256"></canvas>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <canvas id="octave4" width="16" height="16"></canvas>
+      </td>
+      <td>
+        <canvas id="Roctave4" width="256" height="256"></canvas>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <canvas id="octave5" width="32" height="32"></canvas>
+      </td>
+      <td>
+        <canvas id="Roctave5" width="256" height="256"></canvas>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <canvas id="octave6" width="64" height="64"></canvas>
+      </td>
+      <td>
+        <canvas id="Roctave6" width="256" height="256"></canvas>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <canvas id="octave7" width="128" height="128"></canvas>
+      </td>
+      <td>
+        <canvas id="Roctave7" width="256" height="256"></canvas>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        <canvas id="octave8" width="256" height="256"></canvas>
+      </td>
+      <td>
+        <canvas id="Roctave8" width="256" height="256"></canvas>
+      </td>
+    </tr>
+    <tr>
+      <td>
+        &nbsp;
+      </td>
+      <td>
+        <canvas id="render" width="256" height="256"></canvas>
+      </td>
+    </tr>
+  </table>
+
+<script language="javascript">
+
+var octaveNumber = 9;
+
+function randGrey(imageData, x, y) {
+  let grey = Math.random() * 266;
+  setPixelGrey(imageData, x, y, grey, ALPHA);
+}
+
+function onEveryPixel(canvas, fct) {
+  let ctx = canvas.getContext('2d');
+  let imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  for (let x = 0; x <canvas.width; x++) {
+    for (let y = 0; y < canvas.height; y++) {
+      fct(imgData, x, y)
+    }
+  }
+  ctx.putImageData(imgData, 0, 0);
+}
+
+function setPixelGrey(imageData, x, y, grey, alpha) {
+  setPixel(imageData, x, y, grey, grey, grey, alpha);
+}
+
+function setPixel(imageData, x, y, r, g, b, a) {
+  let index = (x + y * imageData.width) * 4;
+  imageData.data[index+0] = r;
+  imageData.data[index+1] = g;
+  imageData.data[index+2] = b;
+  imageData.data[index+3] = a;
+}
+
+function mergeCanvas(canvasSrc, canvasDest) {
+  canvasDest.getContext('2d')
+    .drawImage(canvasSrc,
+        0, 0, canvasSrc.width, canvasSrc.height,
+        0, 0, canvasDest.width, canvasDest.height);
+
+}
+
+function renderOctave(i) {
+  var octave = document.getElementById('octave'+i);
+  var Roctave = document.getElementById('Roctave'+i);
+  var render = document.getElementById('render');
+  onEveryPixel(octave, randGrey);
+  mergeCanvas(octave, Roctave);
+  mergeCanvas(Roctave, render);
+}
+
+function renderOctaves(octaveRange) {
+  octaveRange.forEach(
+    i => renderOctave(i)
+  );
+}
+
+function pow2(x) {
+  return Math.pow(2, x);
+}
+
+function createHtml(octaveRange) {
+  let size = pow2(octaveRange[octaveRange.length-1]);
+  let html = '';
+  octaveRange.forEach(
+    i => {
+      html += '<tr>'
+      +'<td><canvas id="octave'+i+'" width="'+pow2(i)+'" height="'+pow2(i)+'"></canvas></td>'
+      +'<td><canvas id="Roctave'+i+'" width="'+size+'" height="'+size+'"></canvas></td>';
+      +'</tr>';
+    }
+  );
+  html += '<tr>'
+  + '<td>Final</td>'
+  + '<td><canvas id="render" width="'+size+'" height="'+size+'"></canvas></td>'
+  + '</tr>';
+  let table = document.getElementById("table").innerHTML = html;
+}
+
+var ALPHA = 64;
+var octaveRange = [2,3,4,5,6,7];
+
+createHtml(octaveRange);
+renderOctaves(octaveRange);
+
+</script>
+</body>
+
+</html>
