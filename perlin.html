@@ -11,97 +11,20 @@
     td {
       text-align: center;
       vertical-align: middle;
+      border-style: solid;
+      border-width: 1px;
     }
   </style>
 </head>
 <body>
 
-  <table id="table" border="1">
-    <tr>
-      <td>
-        <canvas id="octave0" width="1" height="1"></canvas>
-      </td>
-      <td>
-        <canvas id="Roctave0" width="256" height="256"></canvas>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <canvas id="octave1" width="2" height="2"></canvas>
-      </td>
-      <td>
-        <canvas id="Roctave1" width="256" height="256"></canvas>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <canvas id="octave2" width="4" height="4"></canvas>
-      </td>
-      <td>
-        <canvas id="Roctave2" width="256" height="256"></canvas>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <canvas id="octave3" width="8" height="8"></canvas>
-      </td>
-      <td>
-        <canvas id="Roctave3" width="256" height="256"></canvas>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <canvas id="octave4" width="16" height="16"></canvas>
-      </td>
-      <td>
-        <canvas id="Roctave4" width="256" height="256"></canvas>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <canvas id="octave5" width="32" height="32"></canvas>
-      </td>
-      <td>
-        <canvas id="Roctave5" width="256" height="256"></canvas>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <canvas id="octave6" width="64" height="64"></canvas>
-      </td>
-      <td>
-        <canvas id="Roctave6" width="256" height="256"></canvas>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <canvas id="octave7" width="128" height="128"></canvas>
-      </td>
-      <td>
-        <canvas id="Roctave7" width="256" height="256"></canvas>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        <canvas id="octave8" width="256" height="256"></canvas>
-      </td>
-      <td>
-        <canvas id="Roctave8" width="256" height="256"></canvas>
-      </td>
-    </tr>
-    <tr>
-      <td>
-        &nbsp;
-      </td>
-      <td>
-        <canvas id="render" width="256" height="256"></canvas>
-      </td>
-    </tr>
-  </table>
+<table id="table"></table>
 
 <script language="javascript">
-
-var octaveNumber = 9;
+// Configuration
+var ALPHA = 64;
+var octaveRange = [3,4,5,6,7];
+// [2,3,4,5,6,7,8];
 
 function randGrey(imageData, x, y) {
   let grey = Math.random() * 266;
@@ -176,13 +99,9 @@ function createHtml(octaveRange) {
   let table = document.getElementById("table").innerHTML = html;
 }
 
-var ALPHA = 64;
-var octaveRange = [2,3,4,5,6,7];
-
 createHtml(octaveRange);
 renderOctaves(octaveRange);
 
 </script>
 </body>
-
 </html>
