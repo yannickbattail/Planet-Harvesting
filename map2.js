@@ -3,6 +3,7 @@
 /*globals d3:false */
 
 function getColorFormHeight(high) {
+  if (high == 0) return "#000080";
   var color = d3.scaleSequential(d3.interpolateSpectral);
   //return color(Math.random());
   return color(1-high);
@@ -84,7 +85,7 @@ function getConfig() {
   return {
     size: 1000,
     high: 0.5,
-    radius: 0.999,
+    radius: 0.992,
     sharpness: 0.2
   };
 }
@@ -110,3 +111,25 @@ function generate() {
   createHill(getConfig(), [imgWidth/2, imgHeight/2], diagram, polygons, mapCells, svg);
   return svg.node();
 }
+
+var map = L.map('map', {
+  center: [0, 0],
+  zoom: 0
+});
+
+L.GridLayer.DebugCoords = L.GridLayer.extend({
+  createTile: function (coords, done) {
+    var tile = generate();
+    setTimeout(function () {
+      // Syntax is 'done(error, tile)'
+      done(null, tile);
+    }, 50);
+    return tile;
+  }
+});
+
+L.gridLayer.debugCoords = function(opts) {
+  return new L.GridLayer.DebugCoords(opts);
+};
+
+map.addLayer(L.gridLayer.debugCoords());
