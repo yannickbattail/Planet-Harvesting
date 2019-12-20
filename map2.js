@@ -31,7 +31,7 @@ function polygonAppendPath(polygonList, cells) {
 }
 
 function recolorPolygonesFromHighs(polygonList, svg) {
-  var jsvg = $(svg);
+  var jsvg = $(svg.node());
   polygonList.forEach(
       polyg => jsvg.find("#" + polyg.index).attr("fill", getColorFormHeight(polyg.high))
     );
