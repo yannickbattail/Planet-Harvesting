@@ -2,12 +2,12 @@
 /*globals $:false */
 /*globals d3:false */
 /*globals L:false */
+/*globals SimplexNoise:false */
 /*globals window:false */
 
 function getColorFormHeight(high) {
-  if (high == 0) return "#000080";
+  if (high == 0) return "#245eff";
   var color = d3.scaleSequential(d3.interpolateSpectral);
-  //return color(Math.random());
   return color(1-high);
 }
 
@@ -44,48 +44,6 @@ function recolorPolygonesFromHighs(polygonList, svg) {
     );
 }
 
-function addhill(polygonList, start, config) {
-  var queue = [];
-  var high = config.high;
-  polygonList[start].high += high;
-  polygonList[start].used = 1;
-  queue.push(start);
-  for (let i = 0; i < queue.length && high > 0.01; i++) {
-    high = high * config.radius;
-    polygonList[queue[i]].neighbors
-      .filter(e => !polygonList[e].used)
-      .forEach(e => {
-        polygonList[e].high = computeNewHeight(polygonList[e].high, high, config.sharpness);
-        polygonList[e].used = true;
-        queue.push(e);
-      });
-  }
-  polygonList.forEach(polyg => polyg.used = false);
-}
-
-function computeNewHeight(previousHeight, height, sharpness) {
-  var mod = Math.random() * sharpness + 1.1-sharpness;
-  if (sharpness == 0) {
-    mod = 1;
-  }
-  var newHeight = previousHeight + height * mod;
-  if (newHeight > 1) {
-    return 1;
-  }
-  return newHeight;
-}
-
-function createHill(config, point, diagram, polygons, mapCells) {
-  var nearest = diagram.find(point[0], point[1]).index;
-  mapCells.append("circle")
-    .attr("r", 3)
-    .attr("cx", point[0])
-    .attr("cy", point[1])
-    .attr("fill", getColorFormHeight(config.high))
-    .attr("class", "circle");
-  addhill(polygons, nearest, config);
-}
-
 function getConfig() {
   return {
     imgSize: 256,
@@ -110,7 +68,6 @@ function generate(coords) {
   detectNeighbors(polygons, diagram);
   polygonAppendPath(polygons, mapCells);
   initHeight(diagram, polygons, sites);
-  //createHill(getConfig(), [config.imgSize/2, config.imgSize/2], diagram, polygons, mapCells);
   recolorPolygonesFromHighs(polygons, svg);
   return svg.node();
 }
@@ -163,27 +120,28 @@ function cutPolygList(coords, centers, size) {
 function init() {
   var config = getConfig();
   var sites = d3.range(config.size).map(
-    () => [Math.random() * config.imgSize, Math.random() * config.imgSize]
+    () => [Math.random() * (config.imgSize-1), Math.random() * (config.imgSize-1)]
   );
   var voronoi = d3.voronoi().extent([[0, 0],[config.imgSize, config.imgSize]]);
   sites = voronoi(sites).polygons().map(d3.polygonCentroid);
-  volcano(sites, [config.imgSize/2, config.imgSize/2]);
+  volcano(sites, config.imgSize);
   return sites;
 }
 
-function distance(a, b) {
-  return Math.sqrt( Math.pow((a[0]-b[0]), 2) + Math.pow((a[1]-b[1]), 2) );
-}
-
-function volcano(sites, middle) {
+function volcano(sites, imgSize) {
+  var simplex = new SimplexNoise();
+  var pts = [];
+  for (var x = 0; x < imgSize; x++) {
+    pts.push([]);
+    for (var y = 0; y < imgSize; y++) {
+      var ran = simplex.noise2D(x / 64, y / 64);
+      ran = (ran/2)+0.5;
+      pts[x].push(ran<=0.3?0:ran);
+    }
+  }
   sites.forEach(
     p => {
-      var d = distance(p, middle);
-      var dmax = distance([0,0], middle);
-      p[2] = (1 - d / dmax) * 1.2;
-      if (p[2] >= 1) {
-        p[2] = 1 / (p[2])
-      } 
+      p[2] = pts[Math.round(p[0])][Math.round(p[1])];
     }
   );
 }
