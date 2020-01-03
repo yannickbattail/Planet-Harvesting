@@ -177,7 +177,14 @@ function distance(a, b) {
 
 function volcano(sites, middle) {
   sites.forEach(
-    p => p[2] = 1 / Math.sqrt(distance(p, middle))
+    p => {
+      var d = distance(p, middle);
+      var dmax = distance([0,0], middle);
+      p[2] = (1 - d / dmax) * 1.2;
+      if (p[2] >= 1) {
+        p[2] = 1 / (p[2])
+      } 
+    }
   );
 }
 
