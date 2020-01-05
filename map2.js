@@ -46,8 +46,9 @@ function recolorPolygonesFromHighs(polygonList, svg) {
 
 function getConfig() {
   return {
-    imgSize: 256,
-    size: 5000,
+    tileSize: 256,
+    mapSize: 512,
+    size: 100000,
     high: 0.5,
     radius: 0.992,
     sharpness: 0.2
@@ -57,16 +58,19 @@ function getConfig() {
 function generate(coords) {
   var config = getConfig();
   var svg = d3.create("svg");
-  svg.attr("width", config.imgSize);
-  svg.attr("height", config.imgSize);
+  svg.attr("width", config.tileSize);
+  svg.attr("height", config.tileSize);
   var mapCells = svg.append("g").attr("class", "mapCells");
-  var voronoi = d3.voronoi().extent([[0, 0],[config.imgSize, config.imgSize]]);
-  var sites = cutPolygList(coords, polygCenters, config.imgSize);
+  var voronoi = d3.voronoi().extent([[0, 0],[config.tileSize, config.tileSize]]);
+  //log('cut tile in polygon list');
+  var sites = cutPolygList(coords, polygCenters, config.tileSize);
+  //log('create polygons of tile');
   var diagram = voronoi(sites);
   var polygons = diagram.polygons();
 
   detectNeighbors(polygons, diagram);
   polygonAppendPath(polygons, mapCells);
+  log('set height');
   initHeight(diagram, polygons, sites);
   recolorPolygonesFromHighs(polygons, svg);
   return svg.node();
@@ -88,7 +92,7 @@ function isInBoundaries(point, boundaries) {
       && point[1] <= boundaries.max.y;
 }
 
-function zoom(point, origin, coef) {
+function zoomCoords(point, origin, coef) {
   return [
     (point[0] - origin.x) * coef,
     (point[1] - origin.y) * coef,
@@ -113,32 +117,37 @@ function cutPolygList(coords, centers, size) {
   return centers.filter(
     p => isInBoundaries(p, boundaries)
   ).map(
-    p => zoom(p, boundaries.min, coef)
+    p => zoomCoords(p, boundaries.min, coef)
   );
 }
 
 function init() {
   var config = getConfig();
+  log('create base polygons');
   var sites = d3.range(config.size).map(
-    () => [Math.random() * (config.imgSize-1), Math.random() * (config.imgSize-1)]
+    () => [Math.random() * (config.mapSize-1), Math.random() * (config.mapSize-1)]
   );
-  var voronoi = d3.voronoi().extent([[0, 0],[config.imgSize, config.imgSize]]);
+  var voronoi = d3.voronoi().extent([[0, 0],[config.mapSize-1, config.mapSize-1]]);
+  log('smooth polygons');
   sites = voronoi(sites).polygons().map(d3.polygonCentroid);
-  volcano(sites, config.imgSize);
+  elevation(sites, config.mapSize);
+  log('init end');
   return sites;
 }
 
-function volcano(sites, imgSize) {
+function elevation(sites, mapSize) {
   var simplex = new SimplexNoise();
   var pts = [];
-  for (var x = 0; x < imgSize; x++) {
+  log('random elevation map');
+  for (var x = 0; x < mapSize; x++) {
     pts.push([]);
-    for (var y = 0; y < imgSize; y++) {
-      var ran = simplex.noise2D(x / 64, y / 64);
+    for (var y = 0; y < mapSize; y++) {
+      var ran = simplex.noise2D(x / 32, y / 32);
       ran = (ran/2)+0.5;
       pts[x].push(ran<=0.3?0:ran);
     }
   }
+  log('set elevation to polygones');
   sites.forEach(
     p => {
       p[2] = pts[Math.round(p[0])][Math.round(p[1])];
@@ -146,10 +155,14 @@ function volcano(sites, imgSize) {
   );
 }
 
+function log(message) {
+  document.getElementById('log').innerHTML += ''+(new Date().toString())+' '+message+'<br />';
+}
+
 var polygCenters = init();
 var map = L.map('map', {
   center: [0, 0],
-  zoom: 0
+  zoom: 3
 });
 
 L.GridLayer.DebugCoords = L.GridLayer.extend({
