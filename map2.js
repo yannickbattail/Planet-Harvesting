@@ -7,7 +7,9 @@
 
 function getColorFormHeight(high) {
   if (high == 0) return "#245eff";
-  var color = d3.scaleSequential(d3.interpolateSpectral);
+  //var color = d3.scaleSequential(d3.interpolateSpectral);
+  // interpolateYlGnBu
+  var color = d3.scaleSequential(d3.interpolateYlGn);
   return color(1-high);
 }
 
