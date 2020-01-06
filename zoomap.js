@@ -50,7 +50,7 @@ function getConfig() {
   return {
     tileSize: 256,
     mapSize: 512,
-    size: 100000,
+    size: 50000,
     high: 0.5,
     radius: 0.992,
     sharpness: 0.2
@@ -162,12 +162,8 @@ function log(message) {
 }
 
 var polygCenters = init();
-var map = L.map('map', {
-  center: [0, 0],
-  zoom: 3
-});
 
-L.GridLayer.DebugCoords = L.GridLayer.extend({
+L.GridLayer.Zoomap = L.GridLayer.extend({
   createTile: function (coords, done) {
     var tile = generate(coords);
     window.setTimeout(function () {
@@ -178,8 +174,56 @@ L.GridLayer.DebugCoords = L.GridLayer.extend({
   }
 });
 
-L.gridLayer.debugCoords = function(opts) {
-  return new L.GridLayer.DebugCoords(opts);
+L.gridLayer.zoomap = function(opts) {
+  return new L.GridLayer.Zoomap(opts);
 };
 
-map.addLayer(L.gridLayer.debugCoords());
+var zoomap = L.gridLayer.zoomap();
+
+//OSM
+const o_osm = new L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+});
+
+const mff = new L.tileLayer('https://maps-for-free.com/layer/relief/z{z}/row{y}/{z}_{x}-{y}.jpg', {
+    attribution: '&copy; <a href="https://maps-for-free.com">maps-for-free</a> contributors'
+});
+
+const tileLayer = new L.tileLayer('https://maps-for-free.com/layer/numbers/z{z}/row{y}/{z}_{x}-{y}.gif', {
+    attribution: '&copy; <a href="https://maps-for-free.com">maps-for-free</a> contributors'
+});
+
+var map = L.map('map', {
+  center: [0, 0],
+  zoom: 3,
+  layers: [zoomap]
+});
+
+//BaseLayer
+const Map_BaseLayer = {
+  "zoomap": zoomap
+};
+
+//AddLayer
+const Map_AddLayer = {
+  "OSM": o_osm,
+  "relief": mff,
+  "tiles": tileLayer
+};
+
+//LayerControl
+L.control.layers(
+  Map_BaseLayer,
+  Map_AddLayer,
+  {
+    collapsed: false
+  }
+).addTo(map);
+
+//OpacityControl
+L.control.opacity(
+  Map_AddLayer,
+  {
+    label: "Layers Opacity"
+  }
+).addTo(map);
