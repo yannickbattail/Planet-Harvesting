@@ -161,69 +161,82 @@ function log(message) {
   document.getElementById('log').innerHTML += ''+(new Date().toString())+' '+message+'<br />';
 }
 
+function defineMaps() {
+  L.GridLayer.Zoomap = L.GridLayer.extend({
+    createTile: function (coords, done) {
+      var tile = generate(coords);
+      window.setTimeout(function () {
+        // Syntax is 'done(error, tile)'
+        done(null, tile);
+      }, 50);
+      return tile;
+    }
+  });
+
+  L.gridLayer.zoomap = function(opts) {
+    return new L.GridLayer.Zoomap(opts);
+  };
+
+  var zoomap = L.gridLayer.zoomap();
+
+  L.GridLayer.DebugCoords = L.GridLayer.extend({
+    createTile: function (coords) {
+        var tile = document.createElement('div');
+        tile.innerHTML = [coords.x, coords.y, coords.z].join(', ');
+        tile.style.outline = '1px solid red';
+        return tile;
+    }
+  });
+
+  L.gridLayer.debugCoords = function(opts) {
+    return new L.GridLayer.DebugCoords(opts);
+  };
+  var debugCoords = L.gridLayer.debugCoords();
+
+  //OSM
+  const o_osm = new L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+  });
+
+  const mff = new L.tileLayer('https://maps-for-free.com/layer/relief/z{z}/row{y}/{z}_{x}-{y}.jpg', {
+      attribution: '&copy; <a href="https://maps-for-free.com">maps-for-free</a> contributors'
+  });
+
+  var map = L.map('map', {
+    center: [0, 0],
+    zoom: 3,
+    layers: [zoomap]
+  });
+
+  //BaseLayer
+  const Map_BaseLayer = {
+    "zoomap": zoomap
+  };
+
+  //AddLayer
+  const Map_AddLayer = {
+    "OSM": o_osm,
+    "relief": mff,
+    "debugCoords": debugCoords
+  };
+
+  //LayerControl
+  L.control.layers(
+    Map_BaseLayer,
+    Map_AddLayer,
+    {
+      collapsed: false
+    }
+  ).addTo(map);
+
+  //OpacityControl
+  L.control.opacity(
+    Map_AddLayer,
+    {
+      label: "Layers Opacity"
+    }
+  ).addTo(map);
+}
+
 var polygCenters = init();
-
-L.GridLayer.Zoomap = L.GridLayer.extend({
-  createTile: function (coords, done) {
-    var tile = generate(coords);
-    window.setTimeout(function () {
-      // Syntax is 'done(error, tile)'
-      done(null, tile);
-    }, 50);
-    return tile;
-  }
-});
-
-L.gridLayer.zoomap = function(opts) {
-  return new L.GridLayer.Zoomap(opts);
-};
-
-var zoomap = L.gridLayer.zoomap();
-
-//OSM
-const o_osm = new L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-});
-
-const mff = new L.tileLayer('https://maps-for-free.com/layer/relief/z{z}/row{y}/{z}_{x}-{y}.jpg', {
-    attribution: '&copy; <a href="https://maps-for-free.com">maps-for-free</a> contributors'
-});
-
-const tileLayer = new L.tileLayer('https://maps-for-free.com/layer/numbers/z{z}/row{y}/{z}_{x}-{y}.gif', {
-    attribution: '&copy; <a href="https://maps-for-free.com">maps-for-free</a> contributors'
-});
-
-var map = L.map('map', {
-  center: [0, 0],
-  zoom: 3,
-  layers: [zoomap]
-});
-
-//BaseLayer
-const Map_BaseLayer = {
-  "zoomap": zoomap
-};
-
-//AddLayer
-const Map_AddLayer = {
-  "OSM": o_osm,
-  "relief": mff,
-  "tiles": tileLayer
-};
-
-//LayerControl
-L.control.layers(
-  Map_BaseLayer,
-  Map_AddLayer,
-  {
-    collapsed: false
-  }
-).addTo(map);
-
-//OpacityControl
-L.control.opacity(
-  Map_AddLayer,
-  {
-    label: "Layers Opacity"
-  }
-).addTo(map);
+defineMaps();
