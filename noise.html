@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>noise</title>
+  <style>
+    body {
+      background-color: #dff;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="render" width="256" height="256"></canvas>
+
+<script language="javascript">
+
+const C_SIZE = 256;
+const C_SPLIT = 32;
+
+function randCoordBetween(max) {
+  return {
+      x: Math.round(Math.random() * max),
+      y: Math.round(Math.random() * max)
+    };
+}
+
+function translate(point, translation) {
+  return {
+      x: point.x + translation.x,
+      y: point.y + translation.y,
+    };
+}
+
+function randList(imageData, split) {
+  var squareSize = C_SIZE/split;
+  for (let i = 0; i < split; i++) {
+    for (let j = 0; j < split; j++) {
+      let translation = {x: i*squareSize, y: j*squareSize};
+      let p = translate(randCoordBetween(squareSize), translation);
+      drawPoint(imageData, p)
+    }
+  }
+}
+
+function drawList() {
+  let canvas = document.getElementById('render');
+  let ctx = canvas.getContext('2d');
+  ctx.fillStyle = "white";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  let imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  let pointsList = randList(imageData, C_SPLIT);
+  ctx.putImageData(imageData, 0, 0);
+}
+
+
+function drawPoint(imageData, point) {
+  setPixel(imageData, point.x, point.y, 0, 0, 0, 255);
+}
+
+function setPixel(imageData, x, y, r, g, b, a) {
+  let index = (x + y * imageData.width) * 4;
+  imageData.data[index+0] = r;
+  imageData.data[index+1] = g;
+  imageData.data[index+2] = b;
+  imageData.data[index+3] = a;
+}
+
+function mergeCanvas(canvasSrc, canvasDest) {
+  canvasDest.getContext('2d')
+    .drawImage(canvasSrc,
+        0, 0, canvasSrc.width, canvasSrc.height,
+        0, 0, canvasDest.width, canvasDest.height);
+
+}
+
+drawList();
+
+</script>
+</body>
+
+</html>
