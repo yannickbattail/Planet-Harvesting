@@ -203,8 +203,8 @@ function defineMaps() {
   });
 
   var map = L.map('map', {
-    center: [0, 0],
-    zoom: 3,
+    center: [45.1855436,5.7031409],
+    zoom: 17,
     layers: [zoomap]
   });
 
